@@ -1,0 +1,57 @@
+ModelBegin
+
+    ProtoBegin dash
+        Surface .5 .4 0
+        Color .9 .9 0
+        Vertex -.01 .01 -.05 UV .5 .5
+        Vertex -.01 .01 .05 UV .5 .5
+        Vertex .01 .01 .05 UV .5 .5
+        Vertex .01 .01 -.05 UV .5 .5
+        Quad 1 2 3 4
+    ProtoEnd
+
+    ProtoBegin street
+
+        Vertex -.4 0 -.5 UV .5 .5
+        Vertex -.4 0 .5 UV .5 .5
+        Vertex  .4 0 .5 UV .5 .5
+        Vertex  .4 0 -.5 UV .5 .5
+        Vertex -.4 .01 -.5 UV .5 .5
+        Vertex -.4 .01 .5 UV .5 .5
+        Vertex  .4 .01 .5 UV .5 .5
+        Vertex  .4 .01 -.5 UV .5 .5
+        Vertex -.5 .01 -.5 UV .5 .5
+        Vertex -.5 .01 .5 UV .5 .5
+        Vertex .5 .01 -.5 UV .5 .5
+        Vertex .5 .01 .5 UV .5 .5
+        Vertex -.5 0 -.5 UV .5 .5
+        Vertex -.5 0 .5 UV .5 .5
+        Vertex  .5 0 .5 UV .5 .5
+        Vertex  .5 0 -.5 UV .5 .5
+
+        Surface .5 .1 0      # all objects
+
+        Color .3 .3 .3          # street
+        Quad 1 2 3 4
+	Quad 16 15 14 13
+
+        Color .9 .9 .9          # curbs and sidewalks
+
+        Quad 9 10 6 5
+        Quad 5 6 2 1
+        Quad 8 7 12 11
+        Quad 4 3 7 8
+
+    ProtoEnd
+
+    ClumpBegin
+        ProtoInstance street
+        Translate 0 0 -.33333
+        ProtoInstance dash
+        Translate 0 0 .33333
+        ProtoInstance dash
+        Translate 0 0 .33333
+        ProtoInstance dash
+    ClumpEnd
+
+ModelEnd

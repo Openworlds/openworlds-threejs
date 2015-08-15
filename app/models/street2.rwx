@@ -1,0 +1,68 @@
+ModelBegin
+
+   ClumpBegin
+
+	Vertex -.4 0 -.5 UV .5 .5
+	Vertex -.4 0 -.4 UV .5 .5
+	Vertex -.5 0 -.4 UV .5 .5
+
+	Vertex -.5 0 .4 UV .5 .5
+	Vertex -.4 0 .4 UV .5 .5
+	Vertex -.4 0 .5 UV .5 .5
+
+        Vertex .4 0 .5 UV .5 .5
+        Vertex .4 0 .4 UV .5 .5
+        Vertex .5 0 .4 UV .5 .5
+
+        Vertex .5 0 -.4 UV .5 .5
+        Vertex .4 0 -.4 UV .5 .5
+        Vertex .4 0 -.5 UV .5 .5
+
+	Vertex -.4 .01 -.5 UV .5 .5
+	Vertex -.4 .01 -.4 UV .5 .5
+	Vertex -.5 .01 -.4 UV .5 .5
+        Vertex -.5 .01 -.5 UV .5 .5
+
+	Vertex -.4 .01 .4 UV .5 .5
+	Vertex -.4 .01 .5 UV .5 .5
+	Vertex -.5 .01 .5 UV .5 .5
+        Vertex -.5 .01 .4 UV .5 .5
+
+	Vertex .4 .01 .4 UV .5 .5
+	Vertex .5 .01 .4 UV .5 .5
+	Vertex .5 .01 .5 UV .5 .5
+        Vertex .4 .01 .5 UV .5 .5
+
+        Vertex .4 .01 -.5 UV .5 .5
+        Vertex .5 .01 -.5 UV .5 .5
+        Vertex .5 .01 -.4 UV .5 .5
+        Vertex .4 .01 -.4 UV .5 .5
+
+        Surface .5 .1 0         # all objects
+
+        Color .3 .3 .3          # street
+        Polygon 12 1 2 3 4 5 6 7 8 9 10 11 12
+        Polygon 12 11 10 9 8 7 6 5 4 3 2 1 12
+        Color .9 .9 .9        # curbs and sidewalks
+
+        materialmodes double
+        Quad 13 16 15 14
+        Quad 17 20 19 18
+        Quad 22 21 24 23
+        Quad 26 25 28 27
+
+        Quad 1 13 14 2
+        Quad 14 15 3 2
+
+        Quad 17 5 4 20
+        Quad 17 18 6 5
+
+        Quad 21 8 7 24
+        Quad 22 9 8 21
+
+        Quad 27 28 11 10
+        Quad 28 25 12 11
+
+    ClumpEnd
+
+ModelEnd

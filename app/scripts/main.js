@@ -59,20 +59,16 @@ function init() {
   light.position.set( 1, 1, 1 );
   scene.add( light );
 
-  var texture = THREE.ImageUtils.loadTexture( 'images/crate.gif', THREE.UVMapping, render );
-  texture.anisotropy = renderer.getMaxAnisotropy();
-
-  var geometry = new THREE.BoxGeometry( 200, 200, 200 );
-  var material = new THREE.MeshLambertMaterial( { map: texture } );
-
   control = new THREE.TransformControls( camera, renderer.domElement );
   control.addEventListener( 'change', render );
 
-  var mesh = new THREE.Mesh( geometry, material );
-  scene.add( mesh );
-
-  control.attach( mesh );
-  scene.add( control );
+  var loader = new THREE.RWXLoader();
+  loader.load( "models/stlmpt00.rwx", function(mesh) {
+    mesh.scale.set( 500, 500, 500 );
+    scene.add( mesh );
+    control.attach( mesh );
+    scene.add( control );
+  });
 
   window.addEventListener( 'resize', onWindowResize, false );
   window.addEventListener( 'keydown', function ( event ) {
