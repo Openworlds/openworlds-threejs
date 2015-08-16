@@ -37,20 +37,17 @@ THREE.RWXLoader.prototype = {
 		var clumpnum = 0;
 		var protos = {}
 
-		var color = new THREE.Color( 1.0, 1.0, 1.0 );
-		var opacity = 1.0;
-		var wireframe = false;
+		var mat = new THREE.MeshBasicMaterial({
+			color: '#ffffff',
+			wireframe: false
+		});
+		mat.opacity = 1.0;
+		mat.transparent = false;
 		var mat_changed = true;
 
 		function update_materials() {
-			var mat = new THREE.MeshBasicMaterial({
-				color: color,
-				wireframe: wireframe
-			});
-			mat.opacity = opacity;
-			if (opacity != 1.0)
-				mat.transparent = true;
-			obj.mats.push( mat );
+			// clone and store current material state
+			obj.mats.push( mat.clone() );
 			mat_changed = false;
 		}
 
@@ -243,7 +240,7 @@ THREE.RWXLoader.prototype = {
 				}
 			} else if ( ( result = color_pattern.exec( line ) ) !== null ) {
 
-				color = new THREE.Color(
+				mat.color = new THREE.Color(
 					parseFloat( result[1] ),
 					parseFloat( result[2] ),
 					parseFloat( result[3] )
@@ -257,7 +254,8 @@ THREE.RWXLoader.prototype = {
 
 			} else if ( ( result = opacity_pattern.exec( line ) ) !== null ) {
 
-				opacity = parseFloat( result[1] );
+				mat.opacity = parseFloat( result[1] );
+				mat.transparent = mat.opacity != 1.0;
 				mat_changed = true;
 
 			} else if ( ( result = rotate_pattern.exec( line ) ) !== null ) {
@@ -278,7 +276,7 @@ THREE.RWXLoader.prototype = {
 
 			} else if ( ( result = geometrysampling_pattern.exec( line ) ) !== null ) {
 
-				wireframe = result[1] == "wireframe";
+				mat.wireframe = (result[1] == "wireframe");
 				mat_changed = true;
 
 			} else if ( ( result = materialmode_pattern.exec( line ) ) !== null ) {
