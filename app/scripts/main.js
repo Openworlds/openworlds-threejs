@@ -1,7 +1,6 @@
 var camera, scene, renderer, control, stats;
 
 init();
-render();
 
 var ObjectOptions = function() {
   this.x = 0;
@@ -49,7 +48,7 @@ function init() {
   //
 
   camera = new THREE.PerspectiveCamera( 70, window.innerWidth / window.innerHeight, 1, 3000 );
-  camera.position.set( 1000, 500, 1000 );
+  camera.position.set( 1000, 500, 2 );
   camera.lookAt( new THREE.Vector3( 0, 200, 0 ) );
 
   scene = new THREE.Scene();
@@ -61,14 +60,6 @@ function init() {
 
   control = new THREE.TransformControls( camera, renderer.domElement );
   control.addEventListener( 'change', render );
-
-  var loader = new THREE.RWXLoader();
-  loader.load( "models/stlmpt00.rwx", function(mesh) {
-    mesh.scale.set( 500, 500, 500 );
-    scene.add( mesh );
-    control.attach( mesh );
-    scene.add( control );
-  });
 
   window.addEventListener( 'resize', onWindowResize, false );
   window.addEventListener( 'keydown', function ( event ) {
@@ -95,6 +86,17 @@ function init() {
         control.setSize( Math.max(control.size - 0.1, 0.1 ) );
         break;
     }
+  });
+
+  var loader = new THREE.RWXLoader();
+  loader.load( "models/stlmpt00.rwx", function(mesh) {
+  //loader.load( "models/street2.rwx", function(mesh) {
+  //loader.load( "models/street2.rwx", function(mesh) {
+    mesh.scale.set( 500, 500, 500 );
+    scene.add( mesh );
+    control.attach( mesh );
+    scene.add( control );
+    render();
   });
 }
 

@@ -1,5 +1,23 @@
 /*
  * @author ithamar / https://github.com/openworlds
+ *
+ *
+ * Prototype RWXLoader, currently builds hierachy of
+ * nodes for a single RWX "clump".
+ * *
+ * For performance, we might want to generate a BufferGeometry,
+ * especially once we start instancing for full world scenes.
+ * However, this complicates the material handling, as there
+ * can only be a single material per BufferGeometry, so we
+ * will still need multiple nodes for a single object.
+ *
+ * For now, get something working that we can use to render full
+ * world scenes, and then let the profiling begin!
+ *
+ * Major functionality still missing:
+ *   * texture handling
+ *   * lighting (both vertex and facet based)
+ *   * Lots of 'generic' commands...
  */
 
 THREE.RWXLoader = function ( manager ) {
@@ -28,12 +46,10 @@ THREE.RWXLoader.prototype = {
 
 	parse: function ( text ) {
 
-		var container;
+		var container = new THREE.Object3D();
+		container.name = "container";
 
-		var texture = THREE.ImageUtils.loadTexture( 'images/crate.gif', THREE.UVMapping, render );
-		texture.anisotropy = renderer.getMaxAnisotropy();
-
-		var obj = null;
+		var obj = container;
 		var clumpnum = 0;
 		var protos = {}
 
@@ -44,22 +60,31 @@ THREE.RWXLoader.prototype = {
 		mat.opacity = 1.0;
 		mat.transparent = false;
 		var mat_changed = true;
+		var translation = new THREE.Vector3(0,0,0);
 
 		function update_materials() {
 			// clone and store current material state
-			obj.mats.push( mat.clone() );
+			obj.material.materials.push( mat.clone() );
 			mat_changed = false;
 		}
 
 		function start_object(name, type) {
-			obj = {
-				name: (name !== null) ? name : "clump" + clumpnum++,
-				type: type,
-				geo: new THREE.Geometry(),
-				children: [],
-				mats: [],
-				parent_: obj,
-			};
+			var parent_ = obj;
+
+			obj = new THREE.Mesh( new THREE.Geometry );
+			obj.material = new THREE.MeshFaceMaterial([]);
+			obj.name = (name !== null) ? name : "clump" + clumpnum++;
+
+			if (type != "proto") {
+
+				if (parent_ != null)
+					parent_.add(obj);
+
+			} else {
+
+				obj.is_proto = true;
+
+			}
 		}
 
 		function end_object() {
@@ -67,13 +92,29 @@ THREE.RWXLoader.prototype = {
 				return;
 			}
 
-			if (obj.type == "proto") {
+			if (obj.is_proto) {
+
 				protos[obj.name] = obj;
-				return;
+
+			} else if (obj.material.materials.length == 0) {
+
+				var new_obj = new THREE.Object3D();
+				var parent_ = obj.parent;
+				
+				new_obj.name = obj.name;
+
+				// Empty object, just children
+				while(obj.children.length) {
+					var child = obj.children[0];
+					obj.remove(child);
+					new_obj.add(child);
+				}
+
+				parent_.remove(obj);
+				parent_.add(new_obj);
 			}
 
-			if (obj.parent_ != null)
-				obj.parent_.children.push(obj);
+			obj = container;
 		}
 
 		console.time( 'RWXLoader' );
@@ -119,7 +160,7 @@ THREE.RWXLoader.prototype = {
 
 		// rotate bool bool bool int
 
-		var rotate_pattern = /surface( [0|1])( [0|1])( [0|1])( +-?\d+)/;
+		var rotate_pattern = /rotate( [0|1])( [0|1])( [0|1])( +-?\d+)/;
 
 		// translate float float float
 	
@@ -182,11 +223,19 @@ THREE.RWXLoader.prototype = {
 
 			} else if ( ( result = protoinstance_pattern.exec( line ) ) !== null ) {
 
-				console.log( result );
+				if ( protos[ result[1] ] !== null ) {
+					var new_obj = protos[ result[1] ].clone();
+
+					new_obj.translateX( translation.x );
+					new_obj.translateY( translation.y );
+					new_obj.translateZ( translation.z );
+
+					obj.add( new_obj );
+				}
 
 			} else if ( ( result = vertex_pattern.exec( line ) ) !== null ) {
 
-				obj.geo.vertices.push( new THREE.Vector3(
+				obj.geometry.vertices.push( new THREE.Vector3(
 					parseFloat( result[1] ),
 					parseFloat( result[2] ),
 					parseFloat( result[3] )
@@ -198,11 +247,11 @@ THREE.RWXLoader.prototype = {
 					update_materials();
 				}
 
-				obj.geo.faces.push( new THREE.Face3(
+				obj.geometry.faces.push( new THREE.Face3(
 					parseInt( result[1] ) -1,
 					parseInt( result[2] ) -1,
 					parseInt( result[3] ) -1,
-					null, null, obj.mats.length -1
+					null, null, obj.material.materials.length -1
 					) );
 
 			} else if ( ( result = quad_pattern.exec( line ) ) !== null ) {
@@ -218,8 +267,14 @@ THREE.RWXLoader.prototype = {
 					parseInt( result[4] ) -1,
 				];
 
-				obj.geo.faces.push( new THREE.Face3( indices[0], indices[1], indices[2], null, null, obj.mats.length -1 ) );
-				obj.geo.faces.push( new THREE.Face3( indices[0], indices[2], indices[3], null, null, obj.mats.length -1 ) );
+				obj.geometry.faces.push( new THREE.Face3(
+					indices[0], indices[1], indices[2],
+					null, null, obj.material.materials.length -1 )
+				);
+				obj.geometry.faces.push( new THREE.Face3(
+					indices[0], indices[2], indices[3],
+					null, null, obj.material.materials.length -1 )
+				);
 
 			} else if ( ( result = polygon_pattern.exec( line ) ) !== null ) {
 
@@ -231,11 +286,11 @@ THREE.RWXLoader.prototype = {
 				var start = parseInt( result[2] ) -1;
 
 				for (var j = 3; j <= count; j++) {
-					obj.geo.faces.push(new THREE.Face3(
+					obj.geometry.faces.push(new THREE.Face3(
 						start,
 						parseInt( result[j] ) -1,
 						parseInt( result[j+1] ) -1,
-						null, null, obj.mats.length -1
+						null, null, obj.material.materials.length -1
 					) );
 				}
 			} else if ( ( result = color_pattern.exec( line ) ) !== null ) {
@@ -264,7 +319,9 @@ THREE.RWXLoader.prototype = {
 
 			} else if ( ( result = translate_pattern.exec( line ) ) !== null ) {
 
-				console.log( result );
+				translation.x += parseFloat( result[1] );
+				translation.y += parseFloat( result[2] );
+				translation.z += parseFloat( result[3] );
 
 			} else if ( ( result = texture_pattern.exec( line ) ) !== null ) {
 
@@ -298,7 +355,6 @@ THREE.RWXLoader.prototype = {
 
 		console.log(protos);
 		console.log(obj);
-		container = new THREE.Mesh( obj.geo, new THREE.MeshFaceMaterial( obj.mats ) );
 		console.log(container);
 
 		return container;
