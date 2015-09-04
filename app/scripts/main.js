@@ -47,7 +47,7 @@ function init() {
 
   //
 
-  camera = new THREE.PerspectiveCamera( 70, window.innerWidth / window.innerHeight, 1, 3000 );
+  camera = new THREE.PerspectiveCamera( 70, window.innerWidth / window.innerHeight, 1, 300000 );
   camera.position.set( 1000, 500, 2 );
   camera.lookAt( new THREE.Vector3( 0, 200, 0 ) );
 
@@ -58,8 +58,10 @@ function init() {
   light.position.set( 1, 1, 1 );
   scene.add( light );
 
-  control = new THREE.TransformControls( camera, renderer.domElement );
+  control = new THREE.OrbitControls( camera, renderer.domElement );
+/*
   control.addEventListener( 'change', render );
+  control = new THREE.TransformControls( camera, renderer.domElement );
 
   window.addEventListener( 'resize', onWindowResize, false );
   window.addEventListener( 'keydown', function ( event ) {
@@ -87,16 +89,42 @@ function init() {
         break;
     }
   });
-
+*/
   var loader = new THREE.RWXLoader();
-  loader.load( "models/stlmpt00.rwx", function(mesh) {
-  //loader.load( "models/street2.rwx", function(mesh) {
-  //loader.load( "models/street2.rwx", function(mesh) {
-    mesh.scale.set( 500, 500, 500 );
-    scene.add( mesh );
-    control.attach( mesh );
-    scene.add( control );
-    render();
+  var objectCache = {};
+
+  function loadObject(name,cb) {
+    var propName = name.replace('.', '_');
+    if (!objectCache.hasOwnProperty(propName)) {
+      objectCache[propName] = { loaded: false, mesh: null, callbacks: [cb] };
+      loader.load( 'models/' + name, function(mesh) {
+        mesh.scale.set( 1000, 1000, 1000 );
+	objectCache[propName].mesh = mesh;
+	objectCache[propName].loaded = true;
+	console.log(objectCache);
+	objectCache[propName].callbacks.forEach( function(cb) {
+	  cb(mesh.clone());
+	});
+      });
+      } else {
+	if (!objectCache[propName].loaded)
+          objectCache[propName].callbacks.push(cb);
+	else
+	  cb(objectCache[propName].mesh.clone());
+      }
+    };
+
+  $.getJSON('http://0.0.0.0:3000/api/objects/', function(objects) {
+    objects.forEach(function(obj) {
+      loadObject( obj.model, function(mesh) {
+	mesh.position.set( obj.x, obj.y, obj.z );
+	//mesh.rotation.order = "YXZ";
+	mesh.rotation.x = (obj.tilt / 10) * Math.PI / 180;
+	mesh.rotation.y = (obj.yaw / 10) * Math.PI / 180;
+	mesh.rotation.z = (obj.roll / 10) * Math.PI / 180;
+        scene.add( mesh );
+  	});
+    });
   });
 }
 
@@ -114,3 +142,10 @@ function render() {
   renderer.render( scene, camera );
   stats.update();
 }
+
+function animate() {
+  requestAnimationFrame( animate );
+  render();
+}
+
+animate();
