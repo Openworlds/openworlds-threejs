@@ -60,7 +60,7 @@ THREE.RWXLoader.prototype = {
 		mat.opacity = 1.0;
 		mat.transparent = false;
 		var mat_changed = true;
-		var translation = new THREE.Vector3(0,0,0);
+		var matrix = new THREE.Matrix4();
 
 		function update_materials() {
 			// clone and store current material state
@@ -225,11 +225,7 @@ THREE.RWXLoader.prototype = {
 
 				if ( protos[ result[1] ] !== null ) {
 					var new_obj = protos[ result[1] ].clone();
-
-					new_obj.translateX( translation.x );
-					new_obj.translateY( translation.y );
-					new_obj.translateZ( translation.z );
-
+					new_obj.applyMatrix( matrix );
 					obj.add( new_obj );
 				}
 
@@ -319,9 +315,12 @@ THREE.RWXLoader.prototype = {
 
 			} else if ( ( result = translate_pattern.exec( line ) ) !== null ) {
 
-				translation.x += parseFloat( result[1] );
-				translation.y += parseFloat( result[2] );
-				translation.z += parseFloat( result[3] );
+				var m = new THREE.Matrix4().makeTranslation(
+					parseFloat( result[1] ),
+					parseFloat( result[2] ),
+					parseFloat( result[3] )
+				);
+				matrix.multiply(m);
 
 			} else if ( ( result = texture_pattern.exec( line ) ) !== null ) {
 
