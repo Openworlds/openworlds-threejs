@@ -38,16 +38,21 @@ THREE.RWXLoader.prototype = {
 		loader.setCrossOrigin( this.crossOrigin );
 		loader.load( url, function ( text ) {
 
-			onLoad( scope.parse( text ) );
+			onLoad( scope.parse( url, text ) );
 
 		}, onProgress, onError );
 
 	},
 
-	parse: function ( text ) {
+	parse: function ( url, text ) {
+
+		var name = 'untitled';
+		var pos = url.lastIndexOf('/');
+		if (pos != -1)
+			name = url.slice(pos +1);
 
 		var container = new THREE.Object3D();
-		container.name = "container";
+		container.name = name;
 
 		var obj = container;
 		var clumpnum = 0;
@@ -117,7 +122,7 @@ THREE.RWXLoader.prototype = {
 			obj = container;
 		}
 
-		console.time( 'RWXLoader' );
+		console.time( 'RWXLoader ' + name );
 
 		var lines = text.split( '\n' );
 
@@ -350,11 +355,7 @@ THREE.RWXLoader.prototype = {
 			}
 		}
 
-		console.timeEnd( 'RWXLoader' );
-
-		console.log(protos);
-		console.log(obj);
-		console.log(container);
+		console.timeEnd( 'RWXLoader ' + name );
 
 		return container;
 	}
