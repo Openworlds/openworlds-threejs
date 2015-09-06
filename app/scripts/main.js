@@ -1,151 +1,177 @@
-var camera, scene, renderer, control, stats;
+var camera, scene, renderer, control = null, stats;
+var container = $('#container')[0];
+var raycaster, gui;
+
+var selectedObj = null;
+
+var clock = new THREE.Clock();
+
+// Fix missing removeFolder in dat.GUI
+// See https://code.google.com/p/dat-gui/issues/detail?id=21
+dat.GUI.prototype.removeFolder = function(folder) {
+	var name = folder.name;
+	this.__folders[name].close();
+	this.__folders[name].domElement.parentNode.parentNode.removeChild(this.__folders[name].domElement.parentNode);
+	this.__folders[name] = undefined;
+	this.onResize();
+}
+
+var EditObjectOptions = function(obj) {
+	this.object = obj;
+	this.origPosition = obj.position.clone();
+	this.origRotation = obj.rotation.clone();
+	this.x = obj.position.x;
+	this.y = obj.position.y;
+	this.z = obj.position.z;
+	this.yaw = THREE.Math.radToDeg(obj.rotation.y);
+	this.tilt = THREE.Math.radToDeg(obj.rotation.x);
+	this.roll = THREE.Math.radToDeg(obj.rotation.z);
+
+	this.add = function() {
+		this.folder = gui.addFolder(obj.name);
+		this.folder.add(this, 'x');
+		this.folder.add(this, 'y');
+		this.folder.add(this, 'z');
+		this.folder.add(this, 'yaw', -180, 180);
+		this.folder.add(this, 'tilt', -180, 180);
+		this.folder.add(this, 'roll', -180, 180);
+		this.folder.open();
+	}
+
+	this.remove = function() {
+		gui.removeFolder(this.folder);
+	}
+};
 
 init();
 
-var ObjectOptions = function() {
-  this.x = 0;
-  this.y = 0;
-  this.z = 0;
-  this.yaw = 0;
-  this.tilt = 0;
-  this.roll = 0;
+function selectObject( obj ) {
+	// Remove object options of previously selected object
+	if (selectedObj)
+		selectedObj.remove();
+
+	selectedObj = obj ? new EditObjectOptions(obj) : null;
+
+	// Add object options of newly selected object
+	if (selectedObj)
+		selectedObj.add();
 }
 
-function init() {
-  container = document.createElement( 'div' );
-  document.body.appendChild( container );
+function onDocumentMouseDown( event ) {
+	event.preventDefault();
+	var mouse, obj = null;
 
-  var info = document.createElement( 'div' );
-  info.style.position = 'absolute';
-  info.style.top = '10px';
-  info.style.width = '100%';
-  info.style.textAlign = 'center';
-  info.innerHTML = '<a href="http://openworlds.github.io" target="_blank">OpenWorlds<a/> - Prototype client';
-  container.appendChild( info );
-
-  renderer = new THREE.WebGLRenderer();
-  renderer.setPixelRatio( window.devicePixelRatio );
-  renderer.setSize( window.innerWidth, window.innerHeight );
-  renderer.sortObjects = false;
-  container.appendChild( renderer.domElement );
-
-  stats = new Stats();
-  stats.domElement.style.position = 'absolute';
-  stats.domElement.style.top = '0px';
-  container.appendChild( stats.domElement );
+	mouse = new THREE.Vector2();
+	mouse.x =  ( event.clientX / window.innerWidth ) * 2 - 1;
+	mouse.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
  
-  window.onload = function() {
-    var options = new ObjectOptions();
-    var gui = new dat.GUI();
-    gui.add(options, 'x');
-    gui.add(options, 'y');
-    gui.add(options, 'z');
-    gui.add(options, 'yaw');
-    gui.add(options, 'tilt');
-    gui.add(options, 'roll');
-  };
+	raycaster.setFromCamera( mouse, camera );
 
-  //
+	var intersects = raycaster.intersectObjects( scene.children, true );
+	if ( intersects.length > 0 ) {
+		// TODO: consider inspecting whole array!
+		obj = intersects[0].object;
+		while(obj.parent != scene)
+			obj = obj.parent;
+		if (!obj.userData || !obj.userData.isWorldObject)
+			obj = null;
+	}
 
-  camera = new THREE.PerspectiveCamera( 70, window.innerWidth / window.innerHeight, 1, 300000 );
-  camera.position.set( 1000, 500, 2 );
-  camera.lookAt( new THREE.Vector3( 0, 200, 0 ) );
+	selectObject( obj );
+}
 
-  scene = new THREE.Scene();
-  scene.add( new THREE.GridHelper( 500, 100 ) );
 
-  var light = new THREE.DirectionalLight( 0xffffff, 2 );
-  light.position.set( 1, 1, 1 );
-  scene.add( light );
+function init() {
+	// Add renderer
+	renderer = new THREE.WebGLRenderer();
+	renderer.setPixelRatio( window.devicePixelRatio );
+	renderer.setSize( window.innerWidth, window.innerHeight );
+	renderer.sortObjects = false;
+	container.appendChild( renderer.domElement );
 
-  control = new THREE.OrbitControls( camera, renderer.domElement );
-/*
-  control.addEventListener( 'change', render );
-  control = new THREE.TransformControls( camera, renderer.domElement );
+	// three.js statistics
+	stats = new Stats();
+	stats.domElement.style.position = 'absolute';
+	stats.domElement.style.top = '0px';
+	container.appendChild( stats.domElement );
+ 
+	// dat.GUI options
+	gui = new dat.GUI();
 
-  window.addEventListener( 'resize', onWindowResize, false );
-  window.addEventListener( 'keydown', function ( event ) {
-    //console.log(event.which);
-    switch ( event.keyCode ) {
-      case 81: // Q
-        control.setSpace( control.space == "local" ? "world" : "local" );
-        break;
-      case 87: // W
-        control.setMode( "translate" );
-        break;
-      case 69: // E
-        control.setMode( "rotate" );
-        break;
-      case 82: // R
-        control.setMode( "scale" );
-        break;
-      case 187:
-      case 107: // +,=,num+
-        control.setSize( control.size + 0.1 );
-        break;
-      case 189:
-      case 10: // -,_,num-
-        control.setSize( Math.max(control.size - 0.1, 0.1 ) );
-        break;
-    }
-  });
-*/
-  var loader = new THREE.RWXLoader();
-  var objectCache = {};
+	camera = new THREE.PerspectiveCamera( 45, window.innerWidth / window.innerHeight, 0.001, 3000 );
+	camera.position.set(2,2,4);
 
-  function loadObject(name,cb) {
-    var propName = name.replace('.', '_');
-    if (!objectCache.hasOwnProperty(propName)) {
-      objectCache[propName] = { loaded: false, mesh: null, callbacks: [cb] };
-      loader.load( 'models/' + name, function(mesh) {
-        mesh.scale.set( 1000, 1000, 1000 );
-	objectCache[propName].mesh = mesh;
-	objectCache[propName].loaded = true;
-	console.log(objectCache);
-	objectCache[propName].callbacks.forEach( function(cb) {
-	  cb(mesh.clone());
+	scene = new THREE.Scene();
+	scene.add( new THREE.GridHelper( 500, 1 ) );
+
+	var light = new THREE.DirectionalLight( 0xffffff, 2 );
+	light.position.set( 1, 1, 1 );
+	scene.add( light );
+
+	raycaster = new THREE.Raycaster();
+
+	window.addEventListener( 'resize', onWindowResize, false );
+	document.addEventListener( 'mousedown', onDocumentMouseDown, false );
+
+	control = new THREE.OrbitControls( camera );
+
+	var loader = new THREE.RWXLoader();
+	var objectCache = {};
+
+	function loadObject(name,cb) {
+		var propName = name.replace('.', '_');
+		if (!objectCache.hasOwnProperty(propName)) {
+			objectCache[propName] = { loaded: false, mesh: null, callbacks: [cb] };
+			loader.load( 'models/' + name, function(mesh) {
+				mesh.userData = { isWorldObject: true };
+				objectCache[propName].mesh = mesh;
+				objectCache[propName].loaded = true;
+				objectCache[propName].callbacks.forEach( function(cb) {
+					cb(mesh.clone());
+				});
+			});
+		} else {
+			if (!objectCache[propName].loaded)
+				objectCache[propName].callbacks.push(cb);
+			else
+				cb(objectCache[propName].mesh.clone());
+		}
+	}
+
+	$.getJSON('http://0.0.0.0:3000/api/objects/', function(objects) {
+		objects.forEach(function(obj) {
+			loadObject( obj.model, function(mesh) {
+				mesh.position.set( obj.x / 1000, (obj.y / 1000) + 0.6, obj.z / 1000 );
+				//mesh.rotation.order = "YXZ";
+				mesh.rotation.x = THREE.Math.degToRad(obj.tilt / 10);
+				mesh.rotation.y = THREE.Math.degToRad(obj.yaw / 10);
+				mesh.rotation.z = THREE.Math.degToRad(obj.roll / 10);
+				scene.add( mesh );
+			});
+		});
 	});
-      });
-      } else {
-	if (!objectCache[propName].loaded)
-          objectCache[propName].callbacks.push(cb);
-	else
-	  cb(objectCache[propName].mesh.clone());
-      }
-    };
-
-  $.getJSON('http://0.0.0.0:3000/api/objects/', function(objects) {
-    objects.forEach(function(obj) {
-      loadObject( obj.model, function(mesh) {
-	mesh.position.set( obj.x, obj.y, obj.z );
-	//mesh.rotation.order = "YXZ";
-	mesh.rotation.x = (obj.tilt / 10) * Math.PI / 180;
-	mesh.rotation.y = (obj.yaw / 10) * Math.PI / 180;
-	mesh.rotation.z = (obj.roll / 10) * Math.PI / 180;
-        scene.add( mesh );
-  	});
-    });
-  });
 }
 
 function onWindowResize() {
-  camera.aspect = window.innerWidth / window.innerHeight;
-  camera.updateProjectionMatrix();
+	camera.aspect = window.innerWidth / window.innerHeight;
+	camera.updateProjectionMatrix();
 
-  renderer.setSize( window.innerWidth, window.innerHeight );
+	renderer.setSize( window.innerWidth, window.innerHeight );
 
-  render();
+	render();
 }
 
 function render() {
-  control.update();
-  renderer.render( scene, camera );
-  stats.update();
+	if (control)
+		control.update(clock.getDelta());
+
+	renderer.render( scene, camera );
+	stats.update();
 }
 
 function animate() {
-  requestAnimationFrame( animate );
-  render();
+	requestAnimationFrame( animate );
+	render();
 }
 
 animate();
