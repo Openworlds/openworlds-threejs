@@ -20,21 +20,33 @@ var EditObjectOptions = function(obj) {
 	this.object = obj;
 	this.origPosition = obj.position.clone();
 	this.origRotation = obj.rotation.clone();
-	this.x = obj.position.x;
-	this.y = obj.position.y;
-	this.z = obj.position.z;
-	this.yaw = THREE.Math.radToDeg(obj.rotation.y);
-	this.tilt = THREE.Math.radToDeg(obj.rotation.x);
-	this.roll = THREE.Math.radToDeg(obj.rotation.z);
+	this.x = obj.position.x * 1000;
+	this.y = obj.position.y * 1000;
+	this.z = obj.position.z * 1000;
+	this.yaw = THREE.Math.radToDeg(obj.rotation.y) * 10;
+	this.tilt = THREE.Math.radToDeg(obj.rotation.x) * 10;
+	this.roll = THREE.Math.radToDeg(obj.rotation.z) * 10;
 
 	this.add = function() {
 		this.folder = gui.addFolder(obj.name);
-		this.folder.add(this, 'x');
-		this.folder.add(this, 'y');
-		this.folder.add(this, 'z');
-		this.folder.add(this, 'yaw', -180, 180);
-		this.folder.add(this, 'tilt', -180, 180);
-		this.folder.add(this, 'roll', -180, 180);
+		this.folder.add(this, 'x').step(0.001).onFinishChange(function(x) {
+			obj.position.x = x / 1000;
+		});
+		this.folder.add(this, 'y').step(0.001).onFinishChange(function(y) {
+			obj.position.y = y / 1000;
+		});
+		this.folder.add(this, 'z').step(0.001).onFinishChange(function(z) {
+			obj.position.z = z / 1000;
+		});
+		this.folder.add(this, 'yaw', -180, 180).step(0.001).onChange(function(yaw) {
+			obj.rotation.y = THREE.Math.degToRad(yaw / 10);
+		});
+		this.folder.add(this, 'tilt', -180, 180).step(0.001).onChange(function(tilt) {
+			obj.rotation.x = THREE.Math.degToRad(tilt / 10);
+		});
+		this.folder.add(this, 'roll', -180, 180).step(0.001).onChange(function(roll) {
+			obj.rotation.z = THREE.Math.degToRad(roll / 10);
+		});
 		this.folder.open();
 	}
 
@@ -58,8 +70,11 @@ function selectObject( obj ) {
 }
 
 function onDocumentMouseDown( event ) {
+	if (event.button != 2)
+		return;
+
 	event.preventDefault();
-	var mouse, obj = null;
+	var mouse, distance = 1000, obj = null;
 
 	mouse = new THREE.Vector2();
 	mouse.x =  ( event.clientX / window.innerWidth ) * 2 - 1;
@@ -69,12 +84,16 @@ function onDocumentMouseDown( event ) {
 
 	var intersects = raycaster.intersectObjects( scene.children, true );
 	if ( intersects.length > 0 ) {
-		// TODO: consider inspecting whole array!
-		obj = intersects[0].object;
-		while(obj.parent != scene)
-			obj = obj.parent;
-		if (!obj.userData || !obj.userData.isWorldObject)
-			obj = null;
+		for (var i = 0; i < intersects.length; i++) {
+			var o = intersects[i].object;
+			while(o.parent != scene)
+				o = o.parent;
+			if (o.userData && o.userData.isWorldObject &&
+					intersects[i].distance < distance) {
+				obj = o;
+				distance = intersects[i].distance;
+			}
+		}
 	}
 
 	selectObject( obj );
@@ -102,7 +121,7 @@ function init() {
 	camera.position.set(2,2,4);
 
 	scene = new THREE.Scene();
-	scene.add( new THREE.GridHelper( 500, 1 ) );
+	scene.add( new THREE.GridHelper( 20, 1 ) );
 
 	var light = new THREE.DirectionalLight( 0xffffff, 2 );
 	light.position.set( 1, 1, 1 );
@@ -113,7 +132,8 @@ function init() {
 	window.addEventListener( 'resize', onWindowResize, false );
 	document.addEventListener( 'mousedown', onDocumentMouseDown, false );
 
-	control = new THREE.OrbitControls( camera );
+	control = new THREE.OrbitControls( camera, renderer.domElement );
+	control.noKeys = true; // keys interfere with dat.GUI
 
 	var loader = new THREE.RWXLoader();
 	var objectCache = {};
@@ -141,11 +161,14 @@ function init() {
 	$.getJSON('http://0.0.0.0:3000/api/objects/', function(objects) {
 		objects.forEach(function(obj) {
 			loadObject( obj.model, function(mesh) {
-				mesh.position.set( obj.x / 1000, (obj.y / 1000) + 0.6, obj.z / 1000 );
-				//mesh.rotation.order = "YXZ";
-				mesh.rotation.x = THREE.Math.degToRad(obj.tilt / 10);
-				mesh.rotation.y = THREE.Math.degToRad(obj.yaw / 10);
-				mesh.rotation.z = THREE.Math.degToRad(obj.roll / 10);
+				mesh.position.set(
+						obj.x / 1000,
+						obj.y / 1000,
+						obj.z / 1000 );
+				mesh.rotation.set(
+						THREE.Math.degToRad(obj.tilt / 10),
+						THREE.Math.degToRad(obj.yaw / 10),
+						THREE.Math.degToRad(obj.roll / 10) );
 				scene.add( mesh );
 			});
 		});
