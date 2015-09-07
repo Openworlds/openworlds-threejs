@@ -316,7 +316,24 @@ THREE.RWXLoader.prototype = {
 
 			} else if ( ( result = rotate_pattern.exec( line ) ) !== null ) {
 
-				console.log( result );
+				// Build transform matrix from input
+				var
+					m = new THREE.Matrix4();
+					mx = new THREE.Matrix4(),
+					my = new THREE.Matrix4(),
+					mz = new THREE.Matrix4();
+					x = parseInt( result[1] ) == 1,
+					y = parseInt( result[2] ) == 1,
+					z = parseInt( result[3] ) == 1,
+					angle = THREE.Math.degToRad( parseInt( result[4] ) );
+				if ( x ) mx.makeRotationX( angle );
+				if ( y ) my.makeRotationY( angle );
+				if ( z ) mz.makeRotationY( angle );
+				m.multiplyMatrices(mx, my);
+				m.multiply(mz);
+
+				// Apply outcome to current matrix
+				matrix.multiply(m);
 
 			} else if ( ( result = translate_pattern.exec( line ) ) !== null ) {
 
