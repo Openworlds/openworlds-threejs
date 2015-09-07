@@ -101,7 +101,8 @@ THREE.RWXLoader.prototype = {
 
 				protos[obj.name] = obj;
 
-			} else if (obj.material.materials.length == 0) {
+			} else if (obj.material !== undefined &&
+					obj.material.materials.length == 0) {
 
 				var new_obj = new THREE.Object3D();
 				var parent_ = obj.parent;
