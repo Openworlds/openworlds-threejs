@@ -175,6 +175,15 @@ THREE.RWXLoader.prototype = {
 	
 		var translate_pattern = /translate(\s+[\d|\.|\+|\-|e|E]+)(\s+[\d|\.|\+|\-|e|E]+)(\s+[\d|\.|\+|\-|e|E]+)/;
 
+		// scale float float float
+
+		var scale_pattern = /scale(\s+[\d|\.|\+|\-|e|E]+)(\s+[\d|\.|\+|\-|e|E]+)(\s+[\d|\.|\+|\-|e|E]+)/;
+
+		// transform float float float float float float float float float float float float float float float float
+
+		var transform_pattern = /transform(\s+[\d|\.|\+|\-|e|E]+)(\s+[\d|\.|\+|\-|e|E]+)(\s+[\d|\.|\+|\-|e|E]+)(\s+[\d|\.|\+|\-|e|E]+)(\s+[\d|\.|\+|\-|e|E]+)(\s+[\d|\.|\+|\-|e|E]+)(\s+[\d|\.|\+|\-|e|E]+)(\s+[\d|\.|\+|\-|e|E]+)(\s+[\d|\.|\+|\-|e|E]+)(\s+[\d|\.|\+|\-|e|E]+)(\s+[\d|\.|\+|\-|e|E]+)(\s+[\d|\.|\+|\-|e|E]+)(\s+[\d|\.|\+|\-|e|E]+)(\s+[\d|\.|\+|\-|e|E]+)(\s+[\d|\.|\+|\-|e|E]+)(\s+[\d|\.|\+|\-|e|E]+)/;
+>>>>>>> Stashed changes
+
 		// texture name [type name]
 		
 		var texture_pattern = /texture ([\w|\.|_|-]+)( mask| bump)?( [\w|\.]+)?/;
@@ -368,6 +377,36 @@ THREE.RWXLoader.prototype = {
 					parseFloat( result[3] )
 				);
 				matrix.multiply(m);
+
+			} else if ( ( result = scale_pattern.exec( line ) ) !== null ) {
+
+				var m = new THREE.Matrix4().makeScale(
+					parseFloat( result[1] ),
+					parseFloat( result[2] ),
+					parseFloat( result[3] )
+				);
+				matrix.multiply(m);
+
+			} else if ( ( result = transform_pattern.exec( line ) ) !== null ) {
+
+				matrix.set(
+					parseFloat( result[1].trim() ),
+					parseFloat( result[2].trim() ),
+					parseFloat( result[3].trim() ),
+					parseFloat( result[4].trim() ),
+					parseFloat( result[5].trim() ),
+					parseFloat( result[6].trim() ),
+					parseFloat( result[7].trim() ),
+					parseFloat( result[8].trim() ),
+					parseFloat( result[9].trim() ),
+					parseFloat( result[10].trim() ),
+					parseFloat( result[11].trim() ),
+					parseFloat( result[12].trim() ),
+					parseFloat( result[13].trim() ),
+					parseFloat( result[14].trim() ),
+					parseFloat( result[15].trim() ),
+					parseFloat( result[16].trim() )
+				);
 
 			} else if ( ( result = texture_pattern.exec( line ) ) !== null ) {
 
