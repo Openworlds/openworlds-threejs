@@ -164,6 +164,18 @@ THREE.RWXLoader.prototype = {
 
 		var surface_pattern = /surface(\s+[\d|\.|\+|\-|e|E]+)(\s+[\d|\.|\+|\-|e|E]+)(\s+[\d|\.|\+|\-|e|E]+)/;
 
+		// ambient float
+
+		var ambient_pattern = /ambient(\s+[\d|\.|\+|\-|e|E]+)/;
+
+		// diffuse float
+
+		var diffuse_pattern = /diffuse(\s+[\d|\.|\+|\-|e|E]+)/;
+
+		// specular float
+
+		var specular_pattern = /specular(\s+[\d|\.|\+|\-|e|E]+)/;
+
 		// opacity float
 
 		var opacity_pattern = /opacity(\s+[\d|\.|\+|\-|e|E]+)/;
@@ -348,6 +360,18 @@ THREE.RWXLoader.prototype = {
 				mat_changed = true;
 
 			} else if ( ( result = surface_pattern.exec( line ) ) !== null ) {
+
+				console.log( result );
+
+			} else if ( ( result = ambient_pattern.exec( line ) ) !== null ) {
+
+				console.log( result );
+
+			} else if ( ( result = diffuse_pattern.exec( line ) ) !== null ) {
+
+				console.log( result );
+
+			} else if ( ( result = specular_pattern.exec( line ) ) !== null ) {
 
 				console.log( result );
 
