@@ -139,6 +139,8 @@ function init() {
 
 	function loadObject(name,cb) {
 		var propName = name.replace('.', '_');
+		if (name.indexOf('.') < 0)
+			name += '.rwx';
 		if (!objectCache.hasOwnProperty(propName)) {
 			objectCache[propName] = { loaded: false, mesh: null, callbacks: [cb] };
 			loader.load( 'models/' + name, function(mesh) {
