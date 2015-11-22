@@ -123,9 +123,8 @@ function init() {
 	scene = new THREE.Scene();
 	scene.add( new THREE.GridHelper( 20, 1 ) );
 
-	var light = new THREE.DirectionalLight( 0xffffff, 2 );
-	light.position.set( 1, 1, 1 );
-	scene.add( light );
+	var ambient = new THREE.AmbientLight( 0x777777 );
+	scene.add( ambient );
 
 	raycaster = new THREE.Raycaster();
 
