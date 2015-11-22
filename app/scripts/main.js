@@ -132,7 +132,7 @@ function init() {
 	document.addEventListener( 'mousedown', onDocumentMouseDown, false );
 
 	control = new THREE.OrbitControls( camera, renderer.domElement );
-	control.noKeys = true; // keys interfere with dat.GUI
+	control.enableKeys = false; // keys interfere with dat.GUI
 
 	var loader = new THREE.RWXLoader();
 	var objectCache = {};
