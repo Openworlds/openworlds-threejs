@@ -56,7 +56,8 @@ THREE.RWXLoader.prototype = {
 
 		var obj = container;
 		var clumpnum = 0;
-		var protos = {}
+		var protos = {};
+		var uvs = [];
 
 		var mat = new THREE.MeshBasicMaterial({
 			color: '#ffffff',
@@ -79,6 +80,8 @@ THREE.RWXLoader.prototype = {
 			obj = new THREE.Mesh( new THREE.Geometry );
 			obj.material = new THREE.MeshFaceMaterial([]);
 			obj.name = (name !== null) ? name : "clump" + clumpnum++;
+
+			uvs = [];
 
 			if (type != "proto") {
 
@@ -129,7 +132,7 @@ THREE.RWXLoader.prototype = {
 
 		// vertex float float float
 
-		var vertex_pattern = /vertex( +[\d|\.|\+|\-|e|E]+)( +[\d|\.|\+|\-|e|E]+)( +[\d|\.|\+|\-|e|E]+)/;
+		var vertex_pattern = /(vertex|vertexext)(\s+[\d|\.|\+|\-|e|E]+)(\s+[\d|\.|\+|\-|e|E]+)(\s+[\d|\.|\+|\-|e|E]+)( uv(\s+[\d|\.|\+|\-|e|E]+)(\s+[\d|\.|\+|\-|e|E]+))?/;
 
 		// triangle int int int
 
@@ -238,10 +241,17 @@ THREE.RWXLoader.prototype = {
 			} else if ( ( result = vertex_pattern.exec( line ) ) !== null ) {
 
 				obj.geometry.vertices.push( new THREE.Vector3(
-					parseFloat( result[1] ),
 					parseFloat( result[2] ),
-					parseFloat( result[3] )
+					parseFloat( result[3] ),
+					parseFloat( result[4] )
 					) );
+
+				if (result.length > 5) {
+					uvs.push( new THREE.Vector2(
+						parseFloat( result[5] ),
+						parseFloat( result[6] )
+						) );
+				}
 
 			} else if ( ( result = triangle_pattern.exec( line ) ) !== null ) {
 
@@ -249,12 +259,19 @@ THREE.RWXLoader.prototype = {
 					update_materials();
 				}
 
+				var
+					a = parseInt( result[1] ) -1,
+					b = parseInt( result[2] ) -1,
+					c = parseInt( result[3] ) -1;
+
 				obj.geometry.faces.push( new THREE.Face3(
-					parseInt( result[1] ) -1,
-					parseInt( result[2] ) -1,
-					parseInt( result[3] ) -1,
+					a, b, c,
 					null, null, obj.material.materials.length -1
 					) );
+
+				obj.geometry.faceVertexUvs[0].push( [
+						uvs[a], uvs[b], uvs[c]
+					] );
 
 			} else if ( ( result = quad_pattern.exec( line ) ) !== null ) {
 
@@ -273,10 +290,17 @@ THREE.RWXLoader.prototype = {
 					indices[0], indices[1], indices[2],
 					null, null, obj.material.materials.length -1 )
 				);
+				obj.geometry.faceVertexUvs[0].push( [
+						uvs[ indices[0] ], uvs[ indices[1] ], uvs[ indices[2] ]
+					] );
+
 				obj.geometry.faces.push( new THREE.Face3(
 					indices[0], indices[2], indices[3],
 					null, null, obj.material.materials.length -1 )
 				);
+				obj.geometry.faceVertexUvs[0].push( [
+						uvs[ indices[0] ], uvs[ indices[2] ], uvs[ indices[3] ]
+					] );
 
 			} else if ( ( result = polygon_pattern.exec( line ) ) !== null ) {
 
