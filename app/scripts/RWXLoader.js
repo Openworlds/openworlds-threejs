@@ -136,48 +136,48 @@ THREE.RWXLoader.prototype = {
 
 		// triangle int int int
 
-		var triangle_pattern = /triangle( +-?\d+)( +-?\d+)( +-?\d+)/;
+		var triangle_pattern = /triangle(\s+-?\d+)(\s+-?\d+)(\s+-?\d+)/;
 
 		// quad int int int int	
 
-		var quad_pattern = /quad( +-?\d+)( +-?\d+)( +-?\d+)( +-?\d+)/;
+		var quad_pattern = /quad(\s+-?\d+)(\s+-?\d+)(\s+-?\d+)(\s+-?\d+)/;
 
 		// polygon int int..
 		// XXX fix "varargs" support in here
 
-		var polygon_pattern = /polygon( +-?\d+)( +-?\d+)?( +-?\d+)?( +-?\d+)?( +-?\d+)?( +-?\d+)?( +-?\d+)?( +-?\d+)?( +-?\d+)?( +-?\d+)?( +-?\d+)?( +-?\d+)?( +-?\d+)?/;
+		var polygon_pattern = /polygon(\s+-?\d+)(\s+-?\d+)?(\s+-?\d+)?(\s+-?\d+)?(\s+-?\d+)?(\s+-?\d+)?(\s+-?\d+)?(\s+-?\d+)?(\s+-?\d+)?(\s+-?\d+)?(\s+-?\d+)?(\s+-?\d+)?(\s+-?\d+)?/;
 
 		// protobegin name
 
-		var protobegin_pattern = /protobegin( [a-z0-9]+)/;
+		var protobegin_pattern = /protobegin(\s[a-z0-9]+)/;
 
 		// protoinstance name
 
-		var protoinstance_pattern = /protoinstance( [a-z0-9]+)/;
+		var protoinstance_pattern = /protoinstance(\s[a-z0-9]+)/;
 
 		// color float float float
 
-		var color_pattern = /color( +[\d|\.|\+|\-|e|E]+)( +[\d|\.|\+|\-|e|E]+)( +[\d|\.|\+|\-|e|E]+)/;
+		var color_pattern = /color(\s+[\d|\.|\+|\-|e|E]+)(\s+[\d|\.|\+|\-|e|E]+)(\s+[\d|\.|\+|\-|e|E]+)/;
 
 		// surface float float float
 
-		var surface_pattern = /surface( +[\d|\.|\+|\-|e|E]+)( +[\d|\.|\+|\-|e|E]+)( +[\d|\.|\+|\-|e|E]+)/;
+		var surface_pattern = /surface(\s+[\d|\.|\+|\-|e|E]+)(\s+[\d|\.|\+|\-|e|E]+)(\s+[\d|\.|\+|\-|e|E]+)/;
 
 		// opacity float
 
-		var opacity_pattern = /opacity( +[\d|\.|\+|\-|e|E]+)/;
+		var opacity_pattern = /opacity(\s+[\d|\.|\+|\-|e|E]+)/;
 
 		// rotate bool bool bool int
 
-		var rotate_pattern = /rotate( [0|1])( [0|1])( [0|1])( +-?\d+)/;
+		var rotate_pattern = /rotate(\s+[0|1])(\s+[0|1])(\s+[0|1])(\s+-?\d+)/;
 
 		// translate float float float
 	
-		var translate_pattern = /translate( +[\d|\.|\+|\-|e|E]+)( +[\d|\.|\+|\-|e|E]+)( +[\d|\.|\+|\-|e|E]+)/;
+		var translate_pattern = /translate(\s+[\d|\.|\+|\-|e|E]+)(\s+[\d|\.|\+|\-|e|E]+)(\s+[\d|\.|\+|\-|e|E]+)/;
 
 		// texture name [type name]
 		
-		var texture_pattern = /texture ([\w|\.]+) (mask|bump)? ([\w|\.]+)?/;
+		var texture_pattern = /texture ([\w|\.|_|-]+)( mask| bump)?( [\w|\.]+)?/;
 
 		// texturemode mode
 
@@ -189,11 +189,11 @@ THREE.RWXLoader.prototype = {
 
 		// materialmode mode
 
-		var materialmode_pattern = /materialmode( [double|null])/;
+		var materialmode_pattern = /materialmode(\s+[double|null])/;
 
 		// lightsampling mode
 
-		var lightsampling_pattern = /lightsampling ([\w]+)/;
+		var lightsampling_pattern = /lightsampling\s+([\w]+)/;
 
 		for ( var i = 0; i < lines.length; i ++ ) {
 
