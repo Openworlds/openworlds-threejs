@@ -46,6 +46,7 @@ THREE.RWXLoader.prototype = {
 
 	parse: function ( url, text ) {
 
+		var transform_stack = [];
 		var name = 'untitled';
 		var pos = url.lastIndexOf('/');
 		if (pos != -1)
@@ -222,6 +223,14 @@ THREE.RWXLoader.prototype = {
 			} else if (line == "modelbegin" || line == "modelend") {
 
 				continue;
+
+			} else if ( line == "transformbegin" ) {
+
+				transform_stack.push( matrix );
+
+			} else if ( line == "transformend" ) {
+
+				matrix.copy( transform_stack.pop() );
 
 			} else if (line == "clumpbegin") {
 
