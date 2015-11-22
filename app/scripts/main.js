@@ -163,13 +163,13 @@ function init() {
 		objects.forEach(function(obj) {
 			loadObject( obj.model, function(mesh) {
 				mesh.position.set(
-						obj.x / 1000,
-						obj.y / 1000,
-						obj.z / 1000 );
+						obj.x,
+						obj.y,
+						obj.z );
 				mesh.rotation.set(
-						THREE.Math.degToRad(obj.tilt / 10),
-						THREE.Math.degToRad(obj.yaw / 10),
-						THREE.Math.degToRad(obj.roll / 10) );
+						THREE.Math.degToRad(obj.tilt),
+						THREE.Math.degToRad(obj.yaw),
+						THREE.Math.degToRad(obj.roll) );
 				scene.add( mesh );
 			});
 		});
