@@ -14,10 +14,29 @@
  * For now, get something working that we can use to render full
  * world scenes, and then let the profiling begin!
  *
- * Major functionality still missing:
- *   * texture handling
- *   * lighting (both vertex and facet based)
- *   * Lots of 'generic' commands...
+ * Missing geomtry shapes:
+ * - Block, Cone, Cylinder, Disc, Hemisphere, Sphere
+ * Missing material commands:
+ * - Material{Begin,End}
+ * - {Add,Remove}MaterialMode
+ * - {Add,Remove}TextureMode
+ * - TextureAddressMode
+ * - TextureMode
+ * - Texture
+ * - GeometrySampling
+ * - LightSampling
+ * - AxisAlignment
+ * Missing misc. commands:
+ * - ProtoInstanceGeometry
+ * - Collision
+ * - Identity
+ * - Tag
+ * Missing AW Extensions:
+ * - OpacityFix
+ * - Prelight
+ * - Seamless
+ * - RandomUVs
+ * - TextureAddressMode
  */
 
 THREE.RWXLoader = function ( manager ) {
