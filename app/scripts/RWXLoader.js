@@ -297,8 +297,8 @@ THREE.RWXLoader.prototype = {
 
 				if (result.length > 5) {
 					uvs.push( new THREE.Vector2(
-						parseFloat( result[5] ),
-						parseFloat( result[6] )
+						parseFloat( result[6] ),
+						parseFloat( result[7] )
 						) );
 				}
 
