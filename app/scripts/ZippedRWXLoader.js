@@ -34,9 +34,19 @@ ZippedRWXLoader.prototype = {
 				fname += String.fromCharCode( buffer[30 + i] );
 
 			var newBuf = new Uint8Array( buffer_.slice( 30 + fnameLength ) );
-			var output = pako.inflateRaw(newBuf, { to: 'string' });
+			var output = null;
+
+			try {
+				output = pako.inflateRaw(newBuf, { to: 'string' });
+			} catch(e) {
+				console.error(fname + ': inflate error ', e);
+				return null;
+			}
+
 			this.parser.texturePath = texturePath;
 			return this.parser.parse(fname, output);
+		} else {
+			console.error(fname + ': Not a ZIP file');
 		}
 
 		return null;
