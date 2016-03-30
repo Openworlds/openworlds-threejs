@@ -5,7 +5,8 @@
     "bootstrap-sass": "~3.3.5",
     "dat-gui": "~0.5.1",
     "modernizr": "~2.8.1",
-    "threejs": "*"
+    "threejs": "*",
+    "pako": "~0.2.8"
   },
   "overrides": {
     "bootstrap-sass": {
