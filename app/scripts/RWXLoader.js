@@ -66,10 +66,11 @@ THREE.RWXLoader.prototype = {
 	parse: function ( url, text ) {
 
 		var transform_stack = [];
-		var name = 'untitled';
 		var pos = url.lastIndexOf('/');
+		var name = (pos != -1) ? url.slice(pos + 1) : url;
+		pos = name.lastIndexOf('.');
 		if (pos != -1)
-			name = url.slice(pos +1);
+			name = name.substr(0, pos -1);
 
 		var container = new THREE.Object3D();
 		container.name = name;
