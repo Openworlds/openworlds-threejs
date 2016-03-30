@@ -27,7 +27,7 @@ ZippedRWXLoader.prototype = {
 		if (String.fromCharCode(buffer[0]) == 'P' &&
 			String.fromCharCode(buffer[1]) == 'K') {
 
-			var fnameLength = buffer[26] | (buffer[27] << 8) | (buffer[28] << 16) | (buffer[29] << 24);
+			var fnameLength = buffer[26] | (buffer[27] << 8);
 			var fname = '';
 
 			for (var i = 0; i < fnameLength; i++)
