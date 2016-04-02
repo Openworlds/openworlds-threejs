@@ -28,12 +28,13 @@ ZippedRWXLoader.prototype = {
 			String.fromCharCode(buffer[1]) == 'K') {
 
 			var fnameLength = buffer[26] | (buffer[27] << 8);
+			var extraLength = buffer[28] | (buffer[29] << 8);
 			var fname = '';
 
 			for (var i = 0; i < fnameLength; i++)
 				fname += String.fromCharCode( buffer[30 + i] );
 
-			var newBuf = new Uint8Array( buffer_.slice( 30 + fnameLength ) );
+			var newBuf = new Uint8Array( buffer_.slice( 30 + fnameLength + extraLength ) );
 			var output = null;
 
 			try {
