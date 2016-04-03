@@ -16,13 +16,13 @@ ZippedRWXLoader.prototype = {
 		loader.setResponseType( 'arraybuffer' );
 		loader.load( url, function ( buffer ) {
 
-			onLoad( scope.parse( texturePath, buffer ) );
+			scope.parse( onLoad, onError, texturePath, buffer );
 
 		}, onProgress, onError );
 
 	},
 
-	parse: function ( texturePath, buffer_ ) {
+	parse: function ( onLoad, onError, texturePath, buffer_ ) {
 		var buffer = new Uint8Array(buffer_);
 		if (String.fromCharCode(buffer[0]) == 'P' &&
 			String.fromCharCode(buffer[1]) == 'K') {
@@ -40,15 +40,18 @@ ZippedRWXLoader.prototype = {
 			try {
 				output = pako.inflateRaw(newBuf, { to: 'string' });
 			} catch(e) {
-				console.error(fname + ': inflate error ', e);
+				console.warn(fname + ': inflate error ', e);
+				onError();
 				return null;
 			}
 
 			this.parser.texturePath = texturePath;
-			return this.parser.parse(fname, output);
+			return onLoad( this.parser.parse(fname, output) );
 		} else {
 			console.error(fname + ': Not a ZIP file');
 		}
+
+		onError();
 
 		return null;
 	}
