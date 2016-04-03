@@ -312,10 +312,13 @@ THREE.RWXLoader.prototype = {
 					) );
 
 				if (result.length > 5) {
-					uvs.push( new THREE.Vector2(
+					var uv = new THREE.Vector2(
 						parseFloat( result[6] ),
 						parseFloat( result[7] )
-						) );
+						);
+					uvs.push( uv );
+				} else {
+					uvs.push( new THREE.Vector2() );
 				}
 
 			} else if ( ( result = triangle_pattern.exec( line ) ) !== null ) {
@@ -356,16 +359,16 @@ THREE.RWXLoader.prototype = {
 					null, null, obj.material.materials.length -1 )
 				);
 				obj.geometry.faceVertexUvs[0].push( [
-						uvs[ indices[0] ], uvs[ indices[1] ], uvs[ indices[2] ]
-					] );
+					uvs[ indices[0] ], uvs[ indices[1] ], uvs[ indices[2] ]
+				] );
 
 				obj.geometry.faces.push( new THREE.Face3(
 					indices[0], indices[2], indices[3],
 					null, null, obj.material.materials.length -1 )
 				);
 				obj.geometry.faceVertexUvs[0].push( [
-						uvs[ indices[0] ], uvs[ indices[2] ], uvs[ indices[3] ]
-					] );
+					uvs[ indices[0] ], uvs[ indices[2] ], uvs[ indices[3] ]
+				] );
 
 			} else if ( ( result = polygon_pattern.exec( line ) ) !== null ) {
 
@@ -374,16 +377,21 @@ THREE.RWXLoader.prototype = {
 				}
 
 				var count = result[1];
-				var start = parseInt( result[2] ) -1;
+				var a = parseInt( result[2] ) -1;
 
 				for (var j = 3; j <= count; j++) {
+					var b = parseInt( result[j] ) -1,
+					    c = parseInt( result[j+1] ) -1;
+
 					obj.geometry.faces.push(new THREE.Face3(
-						start,
-						parseInt( result[j] ) -1,
-						parseInt( result[j+1] ) -1,
-						null, null, obj.material.materials.length -1
+						a, b, c, null, null,
+						obj.material.materials.length -1
 					) );
-				}
+
+					obj.geometry.faceVertexUvs[0].push( [
+						uvs[ a ], uvs[ b ], uvs[ c ]
+					] );
+
 			} else if ( ( result = color_pattern.exec( line ) ) !== null ) {
 
 				mat.color = new THREE.Color(
