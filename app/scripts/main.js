@@ -20,32 +20,32 @@ var EditObjectOptions = function(obj) {
 	this.object = obj;
 	this.origPosition = obj.position.clone();
 	this.origRotation = obj.rotation.clone();
-	this.x = obj.position.x * 1000;
-	this.y = obj.position.y * 1000;
-	this.z = obj.position.z * 1000;
-	this.yaw = THREE.Math.radToDeg(obj.rotation.y) * 10;
-	this.tilt = THREE.Math.radToDeg(obj.rotation.x) * 10;
-	this.roll = THREE.Math.radToDeg(obj.rotation.z) * 10;
+	this.x = obj.position.x;
+	this.y = obj.position.y;
+	this.z = obj.position.z;
+	this.yaw = THREE.Math.radToDeg(obj.rotation.y);
+	this.tilt = THREE.Math.radToDeg(obj.rotation.x);
+	this.roll = THREE.Math.radToDeg(obj.rotation.z);
 
 	this.add = function() {
 		this.folder = gui.addFolder(obj.name);
 		this.folder.add(this, 'x').step(0.001).onFinishChange(function(x) {
-			obj.position.x = x / 1000;
+			obj.position.x = x;
 		});
 		this.folder.add(this, 'y').step(0.001).onFinishChange(function(y) {
-			obj.position.y = y / 1000;
+			obj.position.y = y;
 		});
 		this.folder.add(this, 'z').step(0.001).onFinishChange(function(z) {
-			obj.position.z = z / 1000;
+			obj.position.z = z;
 		});
 		this.folder.add(this, 'yaw', -180, 180).step(0.001).onChange(function(yaw) {
-			obj.rotation.y = THREE.Math.degToRad(yaw / 10);
+			obj.rotation.y = THREE.Math.degToRad(yaw);
 		});
 		this.folder.add(this, 'tilt', -180, 180).step(0.001).onChange(function(tilt) {
-			obj.rotation.x = THREE.Math.degToRad(tilt / 10);
+			obj.rotation.x = THREE.Math.degToRad(tilt);
 		});
 		this.folder.add(this, 'roll', -180, 180).step(0.001).onChange(function(roll) {
-			obj.rotation.z = THREE.Math.degToRad(roll / 10);
+			obj.rotation.z = THREE.Math.degToRad(roll);
 		});
 		this.folder.open();
 	}
