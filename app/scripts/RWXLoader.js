@@ -73,7 +73,7 @@ THREE.RWXLoader.prototype = {
 		var name = (pos != -1) ? url.slice(pos + 1) : url;
 		pos = name.lastIndexOf('.');
 		if (pos != -1)
-			name = name.substr(0, pos -1);
+			name = name.substr(0, pos);
 
 		var container = new THREE.Object3D();
 		container.name = name;
