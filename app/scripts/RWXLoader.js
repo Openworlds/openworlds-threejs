@@ -391,6 +391,7 @@ THREE.RWXLoader.prototype = {
 					obj.geometry.faceVertexUvs[0].push( [
 						uvs[ a ], uvs[ b ], uvs[ c ]
 					] );
+				}
 
 			} else if ( ( result = color_pattern.exec( line ) ) !== null ) {
 
