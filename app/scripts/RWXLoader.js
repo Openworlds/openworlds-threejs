@@ -130,7 +130,7 @@ THREE.RWXLoader.prototype = {
 
 				var new_obj = new THREE.Object3D();
 				var parent_ = obj.parent;
-				
+
 				new_obj.name = obj.name;
 
 				// Empty object, just children
@@ -159,7 +159,7 @@ THREE.RWXLoader.prototype = {
 
 		var triangle_pattern = /triangle(\s+-?\d+)(\s+-?\d+)(\s+-?\d+)/;
 
-		// quad int int int int	
+		// quad int int int int
 
 		var quad_pattern = /quad(\s+-?\d+)(\s+-?\d+)(\s+-?\d+)(\s+-?\d+)/;
 
@@ -170,11 +170,11 @@ THREE.RWXLoader.prototype = {
 
 		// protobegin name
 
-		var protobegin_pattern = /protobegin(\s[a-z0-9]+)/;
+		var protobegin_pattern = /protobegin(\s[_a-z0-9]+)/;
 
 		// protoinstance name
 
-		var protoinstance_pattern = /protoinstance(\s[a-z0-9]+)/;
+		var protoinstance_pattern = /protoinstance(\s[_a-z0-9]+)/;
 
 		// color float float float
 
@@ -205,25 +205,28 @@ THREE.RWXLoader.prototype = {
 		var rotate_pattern = /rotate(\s+[0|1])(\s+[0|1])(\s+[0|1])(\s+-?\d+)/;
 
 		// translate float float float
-	
+
 		var translate_pattern = /translate(\s+[\d|\.|\+|\-|e|E]+)(\s+[\d|\.|\+|\-|e|E]+)(\s+[\d|\.|\+|\-|e|E]+)/;
 
 		// scale float float float
 
 		var scale_pattern = /scale(\s+[\d|\.|\+|\-|e|E]+)(\s+[\d|\.|\+|\-|e|E]+)(\s+[\d|\.|\+|\-|e|E]+)/;
 
+		// identity
+
+		var identity_pattern = /identity/;
+
 		// transform float float float float float float float float float float float float float float float float
 
 		var transform_pattern = /transform(\s+[\d|\.|\+|\-|e|E]+)(\s+[\d|\.|\+|\-|e|E]+)(\s+[\d|\.|\+|\-|e|E]+)(\s+[\d|\.|\+|\-|e|E]+)(\s+[\d|\.|\+|\-|e|E]+)(\s+[\d|\.|\+|\-|e|E]+)(\s+[\d|\.|\+|\-|e|E]+)(\s+[\d|\.|\+|\-|e|E]+)(\s+[\d|\.|\+|\-|e|E]+)(\s+[\d|\.|\+|\-|e|E]+)(\s+[\d|\.|\+|\-|e|E]+)(\s+[\d|\.|\+|\-|e|E]+)(\s+[\d|\.|\+|\-|e|E]+)(\s+[\d|\.|\+|\-|e|E]+)(\s+[\d|\.|\+|\-|e|E]+)(\s+[\d|\.|\+|\-|e|E]+)/;
->>>>>>> Stashed changes
 
 		// texture name [type name]
-		
+
 		var texture_pattern = /texture ([\w|\.|_|-]+)( mask| bump)?( [\w|\.]+)?/;
 
 		// texturemode mode
 
-		var texturemode_pattern = /texturemode ([\w]+)+/;
+		var texturemode_pattern = /texturemode[s]? ([\w]+)+/;
 
 		// geometrysampling mode
 
@@ -231,11 +234,20 @@ THREE.RWXLoader.prototype = {
 
 		// materialmode mode
 
-		var materialmode_pattern = /materialmode(\s+[double|null])/;
+		var materialmode_pattern = /materialmode[s]?(\s+[double|null])/;
 
 		// lightsampling mode
 
 		var lightsampling_pattern = /lightsampling\s+([\w]+)/;
+
+		// opacityfix [on | off]
+		var opacityfix_pattern = /opacityfix\s+([\w]+)/;
+
+		// collision [on | off]
+		var collision_pattern = /collision\s+([\w]+)/;
+
+		// axisaligment [zorientx / zorienty | none]
+		var axisalignment_pattern = /axisalignment\s+([\w]+)/;
 
 		for ( var i = 0; i < lines.length; i ++ ) {
 
@@ -381,25 +393,37 @@ THREE.RWXLoader.prototype = {
 
 			} else if ( ( result = surface_pattern.exec( line ) ) !== null ) {
 
-				console.log( result );
+				// TODO: implement
 
 			} else if ( ( result = ambient_pattern.exec( line ) ) !== null ) {
 
-				console.log( result );
+				// TODO: implement
 
 			} else if ( ( result = diffuse_pattern.exec( line ) ) !== null ) {
 
-				console.log( result );
+				// TODO: implement
 
 			} else if ( ( result = specular_pattern.exec( line ) ) !== null ) {
 
-				console.log( result );
+				// TODO: implement
 
 			} else if ( ( result = opacity_pattern.exec( line ) ) !== null ) {
 
 				mat.opacity = parseFloat( result[1] );
 				mat.transparent = mat.opacity != 1.0;
 				mat_changed = true;
+
+			} else if ( ( result = opacityfix_pattern.exec( line ) ) !== null ) {
+
+				// TODO: implement
+
+			} else if ( ( result = collision_pattern.exec( line ) ) !== null ) {
+
+				// TODO: implement
+
+			} else if ( ( result = axisalignment_pattern.exec( line ) ) !== null ) {
+
+				// TODO: implement
 
 			} else if ( ( result = rotate_pattern.exec( line ) ) !== null ) {
 
@@ -440,6 +464,10 @@ THREE.RWXLoader.prototype = {
 				);
 				matrix.multiply(m);
 
+			} else if ( ( result = identity_pattern.exec( line ) ) !== null ) {
+
+				matrix.identity();
+
 			} else if ( ( result = transform_pattern.exec( line ) ) !== null ) {
 
 				matrix.set(
@@ -467,7 +495,7 @@ THREE.RWXLoader.prototype = {
 
 			} else if ( ( result = texturemode_pattern.exec( line ) ) !== null ) {
 
-				console.log( result );
+				// TODO: implement
 
 			} else if ( ( result = geometrysampling_pattern.exec( line ) ) !== null ) {
 
@@ -476,11 +504,11 @@ THREE.RWXLoader.prototype = {
 
 			} else if ( ( result = materialmode_pattern.exec( line ) ) !== null ) {
 
-				console.log( result );
+				// TODO: implement
 
 			} else if ( ( result = lightsampling_pattern.exec( line ) ) !== null ) {
 
-				console.log( result );
+				// TODO: implement
 
 			} else {
 
