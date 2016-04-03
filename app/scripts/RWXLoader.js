@@ -65,6 +65,9 @@ THREE.RWXLoader.prototype = {
 
 	parse: function ( url, text ) {
 
+		var textureLoader = new THREE.TextureLoader();
+		textureLoader.crossOrigin = '';
+
 		var transform_stack = [];
 		var pos = url.lastIndexOf('/');
 		var name = (pos != -1) ? url.slice(pos + 1) : url;
@@ -491,7 +494,19 @@ THREE.RWXLoader.prototype = {
 
 			} else if ( ( result = texture_pattern.exec( line ) ) !== null ) {
 
-				console.log( result );
+				if (result[1].trim() != 'null') {
+					var texUrl = (this.texturePath || 'textures') + '/' + result[1].trim();
+					if (result[1].indexOf('.') < 0)
+						texUrl += '.jpg';
+					mat.map = textureLoader.load( texUrl, function(tex) {
+						tex.flipY = false;
+						tex.wrapS =
+						tex.wrapT = THREE.RepeatWrapping;
+					} );
+				} else {
+					mat.map = null;
+				}
+				mat_changed = true;
 
 			} else if ( ( result = texturemode_pattern.exec( line ) ) !== null ) {
 
