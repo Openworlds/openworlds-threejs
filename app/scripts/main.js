@@ -2,9 +2,15 @@ var camera, scene, renderer, control = null, stats;
 var container = $('#container')[0];
 var raycaster, gui;
 
+var apiBase = 'http://0.0.0.0:3000/api';
+
 var selectedObj = null;
+var objectPath;
+var worldContainer = null;
 
 var clock = new THREE.Clock();
+
+THREE.ImageUtils.crossOrigin = '';
 
 // Fix missing removeFolder in dat.GUI
 // See https://code.google.com/p/dat-gui/issues/detail?id=21
@@ -79,7 +85,7 @@ function onDocumentMouseDown( event ) {
 	mouse = new THREE.Vector2();
 	mouse.x =  ( event.clientX / window.innerWidth ) * 2 - 1;
 	mouse.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
- 
+
 	raycaster.setFromCamera( mouse, camera );
 
 	var intersects = raycaster.intersectObjects( scene.children, true );
@@ -113,11 +119,12 @@ function init() {
 	stats.domElement.style.position = 'absolute';
 	stats.domElement.style.top = '0px';
 	container.appendChild( stats.domElement );
- 
+
 	// dat.GUI options
 	gui = new dat.GUI();
 
 	camera = new THREE.PerspectiveCamera( 45, window.innerWidth / window.innerHeight, 0.001, 3000 );
+	camera.position.set(0,.5,0);
 	camera.position.set(2,2,4);
 
 	scene = new THREE.Scene();
@@ -134,23 +141,25 @@ function init() {
 	control = new THREE.OrbitControls( camera, renderer.domElement );
 	control.enableKeys = false; // keys interfere with dat.GUI
 
-	var loader = new THREE.RWXLoader();
+	//var loader = new ZippedRWXLoader();
 	var objectCache = {};
 
 	function loadObject(name,cb) {
 		var propName = name.replace('.', '_');
+		var loader = new ZippedRWXLoader();
+		name = name.replace('.rwx', '.zip');
 		if (name.indexOf('.') < 0)
-			name += '.rwx';
+			name += '.zip';
 		if (!objectCache.hasOwnProperty(propName)) {
 			objectCache[propName] = { loaded: false, mesh: null, callbacks: [cb] };
-			loader.load( 'models/' + name, function(mesh) {
+			loader.load( objectPath + '/models/' + name, function(mesh) {
 				mesh.userData = { isWorldObject: true };
 				objectCache[propName].mesh = mesh;
 				objectCache[propName].loaded = true;
 				objectCache[propName].callbacks.forEach( function(cb) {
 					cb(mesh.clone());
 				});
-			});
+			}, undefined, function() { console.warn('could not load ', name); }, objectPath + '/textures');
 		} else {
 			if (!objectCache[propName].loaded)
 				objectCache[propName].callbacks.push(cb);
@@ -159,21 +168,52 @@ function init() {
 		}
 	}
 
-	$.getJSON('http://0.0.0.0:3000/api/objects/', function(objects) {
-		objects.forEach(function(obj) {
-			loadObject( obj.model, function(mesh) {
-				mesh.position.set(
-						obj.x,
-						obj.y,
-						obj.z );
-				mesh.rotation.set(
-						THREE.Math.degToRad(obj.tilt),
-						THREE.Math.degToRad(obj.yaw),
-						THREE.Math.degToRad(obj.roll) );
-				scene.add( mesh );
+	function loadWorld(worldId) {
+		$.getJSON(apiBase + '/worlds/' + worldId, function(world) {
+			objectPath = world.objectPath;
+
+			$.getJSON(apiBase + '/worlds/' + worldId + '/objects/', function(objects) {
+				var world = new THREE.Object3D;
+
+				objects.forEach(function(obj) {
+					loadObject( obj.model, function(mesh) {
+						mesh.position.set(
+								obj.x,
+								obj.y,
+								obj.z );
+						mesh.rotation.set(
+								THREE.Math.degToRad(obj.tilt),
+								THREE.Math.degToRad(obj.yaw),
+								THREE.Math.degToRad(obj.roll) );
+						world.add( mesh );
+					});
+				});
+
+				if (worldContainer)
+					scene.remove( worldContainer );
+				worldContainer = world;
+				scene.add( worldContainer );
 			});
 		});
+	}
+
+	$.getJSON(apiBase + '/worlds', function(worlds) {
+		var select = document.getElementById('worldSelect');
+
+		for (var i=0; i < worlds.length; i++) {
+			var w = worlds[i];
+			var option = document.createElement('option');
+			option.value = w.id;
+			option.innerHTML = w.name;
+			select.appendChild(option);
+		}
+
+		select.addEventListener('change', function(ev) {
+			loadWorld( ev.currentTarget.value );
+		}, true);
 	});
+
+	console.log( scene );
 }
 
 function onWindowResize() {
